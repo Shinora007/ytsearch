@@ -1,4 +1,6 @@
-﻿namespace ytsearch.Models
+﻿using System;
+
+namespace ytsearch.Models
 {
     public class YouTubeVideo
     {
@@ -9,5 +11,7 @@
         public string Title { get; set; }
 
         public string ChannelTitle { get; set; }
+
+        public DateTime PublishedAt { get; set; }
     }
 }

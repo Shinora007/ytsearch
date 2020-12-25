@@ -30,7 +30,8 @@ namespace ytsearch
                     Id = x.Id.VideoId,
                     VideoNumber = rand.Next(0, RandomUpperLimit),
                     Title = x.Snippet.Title,
-                    ChannelTitle = x.Snippet.ChannelTitle
+                    ChannelTitle = x.Snippet.ChannelTitle,
+                    PublishedAt = DateTime.Parse(x.Snippet.PublishedAt)
                 }).ToList();
         }
 
@@ -66,7 +67,8 @@ namespace ytsearch
                     Id = x.Id.VideoId,
                     VideoNumber = rand.Next(0, RandomUpperLimit),
                     Title = x.Snippet.Title,
-                    ChannelTitle = x.Snippet.ChannelTitle
+                    ChannelTitle = x.Snippet.ChannelTitle,
+                    PublishedAt = DateTime.Parse(x.Snippet.PublishedAt)
                 }).ToList();
         }
 
