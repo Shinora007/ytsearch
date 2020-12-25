@@ -18,7 +18,7 @@ namespace ytsearch
             int idx = argList.FindIndex(x => x.Equals("-l"));
             if (idx != -1)
             {
-                result.QueryLimit = int.Parse(argList[idx + 1]);
+                result.QueryLimit = int.Parse(argList[idx + 1]) + 1; // Increasing one as sometimes channel also comes in result
                 argList.RemoveAt(idx); // Remove the flag
                 argList.RemoveAt(idx); // Remove the value
             }

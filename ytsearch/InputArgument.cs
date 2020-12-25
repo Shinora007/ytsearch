@@ -10,7 +10,7 @@
 
         public int VideoNumber { get; set; }
 
-        public int QueryLimit { get; set; } = 10;
+        public int QueryLimit { get; set; } = 6;
     }
 
     public enum SearchType

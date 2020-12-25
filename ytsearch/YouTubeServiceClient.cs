@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Upload;
@@ -15,8 +16,21 @@ namespace ytsearch
     {
         private static int RandomSeem = 7;
         private static int RandomUpperLimit = 10;
+        
+        private string youTubeApiKey;
 
-        private static string YouTubeApiKey = Environment.GetEnvironmentVariable("YouTubeApiKey", EnvironmentVariableTarget.User);
+        public YouTubeServiceClient()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                this.youTubeApiKey = Environment.GetEnvironmentVariable("YouTubeApiKey", EnvironmentVariableTarget.User);
+            } 
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                this.youTubeApiKey = Environment.GetEnvironmentVariable("YouTubeApiKey");
+            }
+        }
+
 
         public List<YouTubeVideo> GetVideos(InputArgument inputArg)
         {
@@ -76,7 +90,7 @@ namespace ytsearch
         {
             var youtubeService = new YouTubeService(new BaseClientService.Initializer()
             {
-                ApiKey = YouTubeApiKey,
+                ApiKey = youTubeApiKey,
                 ApplicationName = this.GetType().ToString()
             });
 
