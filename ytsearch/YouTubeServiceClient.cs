@@ -31,7 +31,6 @@ namespace ytsearch
             }
         }
 
-
         public List<YouTubeVideo> GetVideos(InputArgument inputArg)
         {
             SearchListResponse searchListResponse = SearchYouTube(inputArg);

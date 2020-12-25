@@ -7,25 +7,33 @@ namespace ytsearch
 {
     class Program
     {
-        // # Search video [here l is max result limit, by default will be 10]
-        // $ .\ytsearch -l 5 "video search term"
+        private const string HelpText = 
+@"# Search video [here l is max result limit, by default will be 10]
+> ytsearch -l 5 ""video search term""
 
-        // # Search channel [will return code, id  and name of channel]
-        // $ .\ytsearch -l 5 "channel search term" -c
+# Search channel [will return code, id  and name of channel]
+> ytsearch -l 5 ""channel search term"" -c
 
-        // # Get Videos from selected channel code
-        // $ .\ytsearch -l 5 "channel search term" -c 12
+# Get Videos from selected channel code
+> ytsearch -l 5 ""channel search term"" -c 12";
 
         public static void Main(string[] args)
         {
+
             //args = new[] { "news laundry", "-c", "3" };
             //args = new[] { "news laundry" };
 
-            var youTubeClient = new YouTubeServiceClient();
-            
-            var inputArgs = ArgumentParser.Parse(args);
-            //Console.WriteLine($"Search selected: {inputArgs.SearchType}");
+            InputArgument inputArgs = null;
+            try
+            {
+                inputArgs = ArgumentParser.Parse(args);
+            } catch
+            {
+                Console.WriteLine(HelpText);
+                return;
+            }
 
+            var youTubeClient = new YouTubeServiceClient();
 
             List<YouTubeVideo> videos = null;
             List<YouTubeChannel> channels = null;
