@@ -36,16 +36,19 @@ namespace ytsearch
             SearchListResponse searchListResponse = SearchYouTube(inputArg);
 
             var rand = new Random(RandomSeem);
-            return searchListResponse.Items
+            var videos = searchListResponse.Items
                 .Where(r => r.Id.Kind == "youtube#video")
                 .Select(x => new YouTubeVideo
                 {
                     Id = x.Id.VideoId,
-                    VideoNumber = rand.Next(0, RandomUpperLimit),
                     Title = x.Snippet.Title,
                     ChannelTitle = x.Snippet.ChannelTitle,
                     PublishedAt = DateTime.Parse(x.Snippet.PublishedAt)
                 }).ToList();
+
+            videos.Sort((x, y) => DateTime.Compare(x.PublishedAt, y.PublishedAt));
+
+            return videos;
         }
 
         public List<YouTubeChannel> GetChannels(InputArgument inputArg)
@@ -78,7 +81,6 @@ namespace ytsearch
                 .Select(x => new YouTubeVideo
                 {
                     Id = x.Id.VideoId,
-                    VideoNumber = rand.Next(0, RandomUpperLimit),
                     Title = x.Snippet.Title,
                     ChannelTitle = x.Snippet.ChannelTitle,
                     PublishedAt = DateTime.Parse(x.Snippet.PublishedAt)
@@ -92,7 +94,6 @@ namespace ytsearch
                 ApiKey = youTubeApiKey,
                 ApplicationName = this.GetType().ToString()
             });
-
             var searchListRequest = youtubeService.Search.List("snippet");
             searchListRequest.Q = inputArg.SearchTerm;
             searchListRequest.MaxResults = inputArg.QueryLimit;
