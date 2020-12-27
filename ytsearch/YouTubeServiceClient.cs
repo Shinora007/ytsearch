@@ -46,6 +46,11 @@ namespace ytsearch
                     PublishedAt = DateTime.Parse(x.Snippet.PublishedAt)
                 }).ToList();
 
+            if (inputArg.FilterForToday)
+            {
+                videos = videos.Where(x => x.PublishedAt >= DateTime.Now.AddDays(-1)).ToList();
+            }
+
             videos.Sort((x, y) => DateTime.Compare(x.PublishedAt, y.PublishedAt));
 
             return videos;
@@ -76,7 +81,8 @@ namespace ytsearch
             SearchListResponse searchListResponse = SearchYouTube(inputArg, selectedChannel.Id);
 
             var rand = new Random(RandomSeem);
-            return searchListResponse.Items
+            
+            var videos = searchListResponse.Items
                 .Where(r => r.Id.Kind == "youtube#video")
                 .Select(x => new YouTubeVideo
                 {
@@ -85,6 +91,13 @@ namespace ytsearch
                     ChannelTitle = x.Snippet.ChannelTitle,
                     PublishedAt = DateTime.Parse(x.Snippet.PublishedAt)
                 }).ToList();
+            
+            if (inputArg.FilterForToday)
+            {
+                videos = videos.Where(x => x.PublishedAt >= DateTime.Now.AddDays(-1)).ToList();
+            }
+
+            return videos;
         }
 
         private SearchListResponse SearchYouTube(InputArgument inputArg, string channelId = null)

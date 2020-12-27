@@ -11,6 +11,8 @@
         public int VideoNumber { get; set; }
 
         public int QueryLimit { get; set; } = 6;
+
+        public bool FilterForToday { get; set; }
     }
 
     public enum SearchType

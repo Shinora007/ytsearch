@@ -15,7 +15,11 @@ namespace ytsearch
 > ytsearch -l 5 ""channel search term"" -c
 
 # Get Videos from selected channel code
-> ytsearch -l 5 ""channel search term"" -c 12";
+> ytsearch -l 5 ""channel search term"" -c 12
+
+# Get videos published today only
+> ytsearch -l 5 ""video search term"" -t
+";
 
         public static void Main(string[] args)
         {

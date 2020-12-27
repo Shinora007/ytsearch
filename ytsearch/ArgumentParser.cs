@@ -23,6 +23,14 @@ namespace ytsearch
                 argList.RemoveAt(idx); // Remove the value
             }
 
+            // Search for today filter
+            idx = argList.FindIndex(x => x.Equals("-t"));
+            if (idx != -1)
+            {
+                result.FilterForToday = true;
+                argList.RemoveAt(idx);
+            }
+
             idx = argList.FindIndex(x => x.Equals("-c"));
             if (idx != -1)
             {
