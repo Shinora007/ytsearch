@@ -14,9 +14,6 @@ namespace ytsearch
 {
     public class YouTubeServiceClient
     {
-        private static int RandomSeem = 7;
-        private static int RandomUpperLimit = 10;
-        
         private string youTubeApiKey;
 
         public YouTubeServiceClient()
@@ -31,16 +28,81 @@ namespace ytsearch
             }
         }
 
-        public List<YouTubeVideo> GetVideos(InputArgument inputArg)
+        public List<YouTubeVideo> SearchVideos(InputArgument inputArg)
         {
-            SearchListResponse searchListResponse = SearchYouTube(inputArg);
+            // Searching video with matching query [Cost: 100qc]
+            var searchListRequest = provideYouTubeService().Search.List("snippet");
+            searchListRequest.Type = "video";
+            searchListRequest.Q = inputArg.SearchTerm;
+            searchListRequest.MaxResults = inputArg.QueryLimit;
 
-            var rand = new Random(RandomSeem);
+            if (inputArg.FilterForToday)
+            {
+                searchListRequest.PublishedAfter = DateTime.Now.AddDays(-1);
+            }
+
+            SearchListResponse searchListResponse = searchListRequest.Execute();
+
             var videos = searchListResponse.Items
                 .Where(r => r.Id.Kind == "youtube#video")
                 .Select(x => new YouTubeVideo
                 {
                     Id = x.Id.VideoId,
+                    Title = x.Snippet.Title,
+                    ChannelTitle = x.Snippet.ChannelTitle,
+                    PublishedAt = DateTime.Parse(x.Snippet.PublishedAt)
+                }).ToList();
+
+            videos.Sort((x, y) => DateTime.Compare(x.PublishedAt, y.PublishedAt));
+
+            return videos;
+        }
+
+        public List<YouTubeChannel> SearchChannels(InputArgument inputArg)
+        {
+            // Searching channel with matching query [Cost: 100qc]
+            var searchListRequest = provideYouTubeService().Search.List("snippet");
+            searchListRequest.Type = "channel";
+            searchListRequest.Q = inputArg.SearchTerm;
+            searchListRequest.MaxResults = 3;
+
+            SearchListResponse searchListResponse = searchListRequest.Execute();
+
+            var channels = new List<YouTubeChannel>();
+            for (int i = 0; i < searchListResponse.Items.Count; i++)
+            {
+                channels.Add(new YouTubeChannel
+                {
+                    Id = searchListResponse.Items[i].Id.ChannelId,
+                    ChannelNumber = i + 1,
+                    Title = searchListResponse.Items[i].Snippet.Title
+                });
+            }
+
+            return channels;
+        }
+
+        public List<YouTubeVideo> GetVideosUnderChannel(InputArgument inputArg)
+        {
+            // Search channel with given number [Cost: 100qc]
+            var selectedChannel = SearchChannels(inputArg).Single(x => x.ChannelNumber == inputArg.ChannelNumber);
+
+            // Get channels upload playlist [Cost: 1qc]
+            var channelListRequest = provideYouTubeService().Channels.List("contentDetails");
+            channelListRequest.Id = selectedChannel.Id;
+            var channelListResponse = channelListRequest.Execute();
+            string uploadPlayListId = channelListResponse.Items[0].ContentDetails.RelatedPlaylists.Uploads;
+
+            // Get Channel's video list [Cost: 1qc]
+            var playListRequest = provideYouTubeService().PlaylistItems.List("snippet");
+            playListRequest.MaxResults = inputArg.QueryLimit;
+            playListRequest.PlaylistId = uploadPlayListId;
+            var playListResponse = playListRequest.Execute();
+
+            var videos = playListResponse.Items
+                .Select(x => new YouTubeVideo
+                {
+                    Id = x.Snippet.ResourceId.VideoId,
                     Title = x.Snippet.Title,
                     ChannelTitle = x.Snippet.ChannelTitle,
                     PublishedAt = DateTime.Parse(x.Snippet.PublishedAt)
@@ -56,64 +118,13 @@ namespace ytsearch
             return videos;
         }
 
-        public List<YouTubeChannel> GetChannels(InputArgument inputArg)
+        private YouTubeService provideYouTubeService()
         {
-            SearchListResponse searchListResponse = SearchYouTube(inputArg);
-
-            var rand = new Random(RandomSeem);
-            return searchListResponse.Items
-                .Where(r => r.Id.Kind == "youtube#channel")
-                .Select(x => new YouTubeChannel
-                {
-                    Id = x.Id.ChannelId,
-                    ChannelNumber = rand.Next(0, RandomUpperLimit),
-                    Title = x.Snippet.Title
-                }).ToList();
-        }
-
-        public List<YouTubeVideo> GetVideosUnderChannel(InputArgument inputArg)
-        {
-            var youTubeChannels = GetChannels(inputArg);
-
-
-            var selectedChannel = youTubeChannels.Single(x => x.ChannelNumber == inputArg.ChannelNumber);
-
-            SearchListResponse searchListResponse = SearchYouTube(inputArg, selectedChannel.Id);
-
-            var rand = new Random(RandomSeem);
-            
-            var videos = searchListResponse.Items
-                .Where(r => r.Id.Kind == "youtube#video")
-                .Select(x => new YouTubeVideo
-                {
-                    Id = x.Id.VideoId,
-                    Title = x.Snippet.Title,
-                    ChannelTitle = x.Snippet.ChannelTitle,
-                    PublishedAt = DateTime.Parse(x.Snippet.PublishedAt)
-                }).ToList();
-            
-            if (inputArg.FilterForToday)
-            {
-                videos = videos.Where(x => x.PublishedAt >= DateTime.Now.AddDays(-1)).ToList();
-            }
-
-            return videos;
-        }
-
-        private SearchListResponse SearchYouTube(InputArgument inputArg, string channelId = null)
-        {
-            var youtubeService = new YouTubeService(new BaseClientService.Initializer()
+            return new YouTubeService(new BaseClientService.Initializer()
             {
                 ApiKey = youTubeApiKey,
                 ApplicationName = this.GetType().ToString()
             });
-            var searchListRequest = youtubeService.Search.List("snippet");
-            searchListRequest.Q = inputArg.SearchTerm;
-            searchListRequest.MaxResults = inputArg.QueryLimit;
-            searchListRequest.ChannelId = channelId;
-
-            var searchListResponse = searchListRequest.Execute();
-            return searchListResponse;
         }
     }
 }

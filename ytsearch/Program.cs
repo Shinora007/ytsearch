@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using ytsearch.Models;
 
 namespace ytsearch
@@ -23,9 +24,11 @@ namespace ytsearch
 
         public static void Main(string[] args)
         {
-
-            //args = new[] { "news laundry", "-c", "3" };
-            //args = new[] { "news laundry" };
+            if (Debugger.IsAttached)
+            {
+                //args = new[] { "-c", "3", "akash banerjee", "-t" };
+                args = new[] { "-c", "akash banerjee" };
+            }
 
             InputArgument inputArgs = null;
             try
@@ -45,11 +48,11 @@ namespace ytsearch
             switch (inputArgs.SearchType)
             {
                 case SearchType.VideoSearch:
-                    videos = youTubeClient.GetVideos(inputArgs);
+                    videos = youTubeClient.SearchVideos(inputArgs);
                     Console.WriteLine(JsonConvert.SerializeObject(videos, Formatting.Indented));
                     break;
                 case SearchType.ChannelSearch:
-                    channels = youTubeClient.GetChannels(inputArgs);
+                    channels = youTubeClient.SearchChannels(inputArgs);
                     Console.WriteLine(JsonConvert.SerializeObject(channels, Formatting.Indented));
                     break;
                 case SearchType.VideoUnderChannelSearch:
