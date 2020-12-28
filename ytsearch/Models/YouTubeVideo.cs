@@ -10,6 +10,8 @@ namespace ytsearch.Models
 
         public string ChannelTitle { get; set; }
 
+        public TimeSpan Duration { get; set; }
+
         public DateTime PublishedAt { get; set; }
     }
 }
